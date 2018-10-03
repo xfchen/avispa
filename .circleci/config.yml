@@ -1,0 +1,38 @@
+version: 2
+jobs:
+  build_project:
+    machine: true
+    steps:
+      - checkout
+      - restore-cache:
+          key: stack-{{ checksum "stack.yaml" }}
+          paths:
+            - "~/.stack"
+      - restore-cache:
+          key: stack-{{ checksum "stack.yaml" }}-{{ checksum "package.yaml" }}
+          paths:
+            - ".stack-work"
+      - run: echo “Hello, we are going to start the build now.”
+      - run: sudo apt-get update
+      - run: sudo apt-get install postgresql libpq-dev
+      - run: wget https://github.com/commercialhaskell/stack/releases/download/v1.9.0.1/stack-1.9.0.1-linux-x86_64-static.tar.gz -O /tmp/stack.tar.gz
+      - run: sudo mkdir /tmp/stack-download
+      - run: sudo tar -xzf /tmp/stack.tar.gz -C /tmp/stack-download
+      - run: sudo chmod +x /tmp/stack-download/stack-1.9.0.1-linux-x86_64-static/stack
+      - run: sudo mv /tmp/stack-download/stack-1.9.0.1-linux-x86_64-static/stack /usr/bin/stack
+      - run: stack setup
+      - run: stack build
+      - save-cache:
+          key: stack-{{ checksum "stack.yaml" }}
+          paths:
+            - "~/.stack"
+      - save-cache:
+          key: stack-{{ checksum "stack.yaml" }}-{{ checksum "avispa.cabal" }}
+          paths:
+            - ".stack-work"
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build_project
