@@ -9,7 +9,7 @@ jobs:
           paths:
             - "~/.stack"
       - restore-cache:
-          key: stack-{{ checksum "stack.yaml" }}-{{ checksum "package.yaml" }}
+          key: stack-{{ checksum "package.yaml" }}
           paths:
             - ".stack-work"
       #- run: echo “Hello, we are going to start the build now.”
